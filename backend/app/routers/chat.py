@@ -1,9 +1,9 @@
 import uuid
 
 from fastapi import APIRouter, Depends
+from fastapi.responses import StreamingResponse
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from sse_starlette.sse import EventSourceResponse
 
 from app.database import get_db
 from app.models import Conversation
@@ -15,9 +15,10 @@ router = APIRouter(prefix="/api/chat", tags=["chat"])
 
 @router.post("")
 async def chat(req: ChatRequest, db: AsyncSession = Depends(get_db)):
-    return EventSourceResponse(
+    return StreamingResponse(
         rag_stream(db, req.message, req.conversation_id),
         media_type="text/event-stream",
+        headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
     )
 
 

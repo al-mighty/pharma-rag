@@ -1,5 +1,5 @@
 import uuid
-from datetime import datetime, timezone
+from datetime import datetime
 
 from pgvector.sqlalchemy import Vector
 from sqlalchemy import ForeignKey, Text
@@ -10,7 +10,7 @@ from app.database import Base
 
 
 def utcnow():
-    return datetime.now(timezone.utc)
+    return datetime.utcnow()
 
 
 class Document(Base):

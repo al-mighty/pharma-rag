@@ -1,4 +1,4 @@
-const BASE = "/api";
+const BASE = "/pharma-rag/api";
 
 export async function fetchSSE(
   message: string,

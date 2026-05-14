@@ -1,22 +1,13 @@
 import json
 from collections.abc import AsyncGenerator
 
-import anthropic
+import httpx
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.config import settings
 from app.models import Conversation, Message
 from app.prompts.templates import CONTEXT_TEMPLATE, SYSTEM_PROMPT
 from app.services.vectorstore import search_similar
-
-_client: anthropic.Anthropic | None = None
-
-
-def _get_client() -> anthropic.Anthropic:
-    global _client
-    if _client is None:
-        _client = anthropic.Anthropic(api_key=settings.anthropic_api_key)
-    return _client
 
 
 def build_context(sources: list[dict]) -> str:
@@ -57,7 +48,7 @@ async def rag_stream(
     conversation_id=None,
 ) -> AsyncGenerator[str, None]:
     """
-    RAG pipeline: search → context → stream LLM response.
+    RAG pipeline: search → context → stream LLM response via Ollama.
     Yields SSE-formatted events.
     """
     # 1. Retrieve relevant chunks
@@ -77,19 +68,31 @@ async def rag_stream(
         messages.extend(history)
     messages.append({"role": "user", "content": user_message})
 
-    # 4. Stream LLM response
-    client = _get_client()
+    # 4. Stream LLM response via Ollama
     full_response = ""
 
-    with client.messages.stream(
-        model=settings.llm_model,
-        max_tokens=2048,
-        system=system_prompt,
-        messages=messages,
-    ) as stream:
-        for text in stream.text_stream:
-            full_response += text
-            yield f"event: token\ndata: {json.dumps(text, ensure_ascii=False)}\n\n"
+    async with httpx.AsyncClient(timeout=120.0) as client:
+        async with client.stream(
+            "POST",
+            f"{settings.ollama_base_url}/api/chat",
+            json={
+                "model": settings.llm_model,
+                "messages": [
+                    {"role": "system", "content": system_prompt},
+                    *messages,
+                ],
+                "stream": True,
+            },
+        ) as resp:
+            resp.raise_for_status()
+            async for line in resp.aiter_lines():
+                if not line:
+                    continue
+                data = json.loads(line)
+                if "message" in data and "content" in data["message"]:
+                    token = data["message"]["content"]
+                    full_response += token
+                    yield f"event: token\ndata: {json.dumps(token, ensure_ascii=False)}\n\n"
 
     # 5. Save to database
     if not conversation_id:
@@ -98,14 +101,12 @@ async def rag_stream(
         await db.flush()
         conversation_id = conv.id
 
-    # Save user message
     db.add(Message(
         conversation_id=conversation_id,
         role="user",
         content=user_message,
     ))
 
-    # Save assistant message with sources
     db.add(Message(
         conversation_id=conversation_id,
         role="assistant",
@@ -115,5 +116,4 @@ async def rag_stream(
 
     await db.commit()
 
-    # Yield done event
     yield f"event: done\ndata: {json.dumps({'conversation_id': str(conversation_id)}, ensure_ascii=False)}\n\n"

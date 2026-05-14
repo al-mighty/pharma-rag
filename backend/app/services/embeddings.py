@@ -1,25 +1,21 @@
-import anthropic
+import httpx
 
 from app.config import settings
 
-_client: anthropic.Anthropic | None = None
-
-
-def _get_client() -> anthropic.Anthropic:
-    global _client
-    if _client is None:
-        _client = anthropic.Anthropic(api_key=settings.anthropic_api_key)
-    return _client
-
 
 async def embed_texts(texts: list[str]) -> list[list[float]]:
-    """Embed texts using Anthropic's Voyage model via the embeddings API."""
-    client = _get_client()
-    response = client.embeddings.create(
-        model=settings.embedding_model,
-        input=texts,
-    )
-    return [item.embedding for item in response.data]
+    """Embed texts using Ollama nomic-embed-text model."""
+    embeddings = []
+    async with httpx.AsyncClient(timeout=60.0) as client:
+        for text in texts:
+            resp = await client.post(
+                f"{settings.ollama_base_url}/api/embed",
+                json={"model": settings.embedding_model, "input": text},
+            )
+            resp.raise_for_status()
+            data = resp.json()
+            embeddings.append(data["embeddings"][0])
+    return embeddings
 
 
 async def embed_query(text: str) -> list[float]:

@@ -1,4 +1,4 @@
-const BASE = "/api";
+const BASE = "/pharma-rag/api";
 export async function fetchSSE(message, conversationId, onSources, onToken, onDone) {
     const resp = await fetch(`${BASE}/chat`, {
         method: "POST",

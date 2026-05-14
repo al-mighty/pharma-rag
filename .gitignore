@@ -9,3 +9,4 @@ __pycache__/
 .mypy_cache/
 .claude/
 CLAUDE.md.idea/
+.idea/

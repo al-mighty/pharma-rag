@@ -1,0 +1,23 @@
+@import "tailwindcss";
+
+@theme {
+  --color-pharma-primary: #0D7377;
+  --color-pharma-dark: #064E50;
+  --color-pharma-light: #E6F7F8;
+  --color-pharma-accent: #00A651;
+  --color-pharma-bg: #F7F9FC;
+  --color-pharma-surface: #FFFFFF;
+  --color-pharma-text: #1E293B;
+  --color-pharma-muted: #64748B;
+  --color-pharma-source: #FEF3C7;
+  --color-pharma-source-border: #F59E0B;
+  --font-sans: "Inter", sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+}
+
+body {
+  font-family: var(--font-sans);
+  background: var(--color-pharma-bg);
+  color: var(--color-pharma-text);
+  margin: 0;
+}

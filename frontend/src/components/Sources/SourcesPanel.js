@@ -1,0 +1,6 @@
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
+import { BookOpen } from "lucide-react";
+import { SourceCard } from "./SourceCard";
+export function SourcesPanel({ sources, highlightedIndex }) {
+    return (_jsxs("div", { className: "flex flex-col h-full border-l border-gray-200 bg-pharma-bg", children: [_jsx("div", { className: "px-4 py-3 border-b border-gray-200 bg-white", children: _jsxs("div", { className: "flex items-center gap-2", children: [_jsx(BookOpen, { className: "w-4 h-4 text-pharma-primary" }), _jsx("h2", { className: "text-sm font-semibold", children: "\u0418\u0441\u0442\u043E\u0447\u043D\u0438\u043A\u0438" }), sources.length > 0 && (_jsxs("span", { className: "text-xs font-mono text-pharma-muted", children: ["(", sources.length, ")"] }))] }) }), _jsx("div", { className: "flex-1 overflow-y-auto p-3 space-y-2", children: sources.length === 0 ? (_jsxs("div", { className: "flex flex-col items-center justify-center h-full text-pharma-muted text-xs", children: [_jsx(BookOpen, { className: "w-8 h-8 mb-2 opacity-20" }), _jsx("p", { children: "\u0418\u0441\u0442\u043E\u0447\u043D\u0438\u043A\u0438 \u043F\u043E\u044F\u0432\u044F\u0442\u0441\u044F \u0437\u0434\u0435\u0441\u044C" })] })) : (sources.map((src, i) => (_jsx(SourceCard, { source: src, index: i, highlighted: highlightedIndex === i }, src.chunk_id)))) })] }));
+}

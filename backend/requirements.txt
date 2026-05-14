@@ -9,4 +9,4 @@ langchain-text-splitters==0.3.8
 pypdf==5.5.0
 python-multipart==0.0.20
 httpx==0.28.1
-sse-starlette==2.3.3
+fastembed==0.6.1

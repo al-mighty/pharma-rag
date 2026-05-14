@@ -33,7 +33,7 @@ class Chunk(Base):
     content: Mapped[str] = mapped_column(Text)
     page_number: Mapped[int | None]
     chunk_index: Mapped[int]
-    embedding: Mapped[list[float]] = mapped_column(Vector(768))
+    embedding: Mapped[list[float]] = mapped_column(Vector(384))
     metadata_: Mapped[dict] = mapped_column("metadata", JSONB, default=dict)
 
     document: Mapped["Document"] = relationship(back_populates="chunks")

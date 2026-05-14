@@ -1,6 +1,7 @@
 import ReactMarkdown from "react-markdown";
 import { Bot, User } from "lucide-react";
 import type { ChatMessage } from "../../types";
+import type { ReactNode } from "react";
 
 interface Props {
   message: ChatMessage;
@@ -9,6 +10,18 @@ interface Props {
 
 export function MessageBubble({ message, onCiteClick }: Props) {
   const isUser = message.role === "user";
+
+  function processCitations(children: ReactNode): ReactNode {
+    if (typeof children === "string") {
+      return renderCitations(children, onCiteClick);
+    }
+    if (Array.isArray(children)) {
+      return children.map((child, i) => (
+        <span key={i}>{processCitations(child)}</span>
+      ));
+    }
+    return children;
+  }
 
   return (
     <div className={`flex gap-3 ${isUser ? "justify-end" : ""}`}>
@@ -30,13 +43,8 @@ export function MessageBubble({ message, onCiteClick }: Props) {
           <div className="prose prose-sm max-w-none prose-p:my-1 prose-li:my-0.5 prose-headings:mb-2 prose-headings:mt-3">
             <ReactMarkdown
               components={{
-                p: ({ children }) => {
-                  // Replace [1], [2] etc. with clickable badges
-                  if (typeof children === "string") {
-                    return <p>{renderCitations(children, onCiteClick)}</p>;
-                  }
-                  return <p>{children}</p>;
-                },
+                p: ({ children }) => <p>{processCitations(children)}</p>,
+                li: ({ children }) => <li>{processCitations(children)}</li>,
               }}
             >
               {message.content || "●"}

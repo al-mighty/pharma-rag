@@ -28,6 +28,9 @@ services:
         condition: service_healthy
     volumes:
       - ./data:/app/data
+    networks:
+      - default
+      - cheslav-net
     restart: unless-stopped
 
   frontend:
@@ -37,7 +40,14 @@ services:
       - "3000:80"
     depends_on:
       - backend
+    networks:
+      - default
+      - cheslav-net
     restart: unless-stopped
 
 volumes:
   pgdata:
+
+networks:
+  cheslav-net:
+    external: true

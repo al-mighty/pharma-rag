@@ -14,6 +14,12 @@ services:
       interval: 5s
       timeout: 3s
       retries: 5
+    restart: unless-stopped
+    networks:
+      cheslav-net:
+        aliases:
+          - pharma-rag-db
+          - pr-db
 
   backend:
     build:
@@ -21,7 +27,7 @@ services:
     ports:
       - "8000:8000"
     environment:
-      DATABASE_URL: postgresql+asyncpg://pharma:${POSTGRES_PASSWORD:-pharma_secret}@db:5432/pharma_rag
+      DATABASE_URL: postgresql+asyncpg://pharma:${POSTGRES_PASSWORD:-pharma_secret}@pr-db:5432/pharma_rag
       GIGACHAT_AUTH_KEY: ${GIGACHAT_AUTH_KEY}
     depends_on:
       db:
@@ -29,8 +35,9 @@ services:
     volumes:
       - ./data:/app/data
     networks:
-      - default
-      - cheslav-net
+      cheslav-net:
+        aliases:
+          - pharma-rag-backend-1
     restart: unless-stopped
 
   frontend:
@@ -41,8 +48,9 @@ services:
     depends_on:
       - backend
     networks:
-      - default
-      - cheslav-net
+      cheslav-net:
+        aliases:
+          - pharma-rag-frontend-1
     restart: unless-stopped
 
 volumes:

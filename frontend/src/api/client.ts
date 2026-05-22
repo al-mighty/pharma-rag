@@ -18,6 +18,12 @@ export async function fetchSSE(
   const reader = resp.body!.getReader();
   const decoder = new TextDecoder();
   let buffer = "";
+  // SSE state lives ACROSS chunks: a big payload (sources can be ~7KB) gets
+  // split between TCP chunks and the matching `event: ...` line may have
+  // arrived in a previous iteration. Resetting currentEvent per-chunk drops
+  // those events silently — which is exactly the bug that left the
+  // sources panel empty.
+  let currentEvent = "";
 
   while (true) {
     const { done, value } = await reader.read();
@@ -27,9 +33,13 @@ export async function fetchSSE(
     const lines = buffer.split("\n");
     buffer = lines.pop() || "";
 
-    let currentEvent = "";
     for (const line of lines) {
-      if (line.startsWith("event: ")) {
+      if (line === "") {
+        // Blank line marks the end of one SSE event block — per spec we
+        // dispatch + reset here. Our dispatch happens inline above, so
+        // just clear the event name.
+        currentEvent = "";
+      } else if (line.startsWith("event: ")) {
         currentEvent = line.slice(7).trim();
       } else if (line.startsWith("data: ")) {
         const data = line.slice(6);

@@ -14,7 +14,7 @@ services:
       interval: 5s
       timeout: 3s
       retries: 5
-    restart: unless-stopped
+    restart: always
     networks:
       cheslav-net:
         aliases:
@@ -38,7 +38,7 @@ services:
       cheslav-net:
         aliases:
           - pharma-rag-backend-1
-    restart: unless-stopped
+    restart: always
 
   frontend:
     build:
@@ -51,7 +51,7 @@ services:
       cheslav-net:
         aliases:
           - pharma-rag-frontend-1
-    restart: unless-stopped
+    restart: always
 
 volumes:
   pgdata:

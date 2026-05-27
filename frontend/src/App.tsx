@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Header } from "./components/Layout/Header";
 import { ChatPanel } from "./components/Chat/ChatPanel";
 import { SourcesPanel } from "./components/Sources/SourcesPanel";
@@ -9,6 +9,14 @@ export default function App() {
   const { messages, sources, isStreaming, sendMessage, clearChat } = useChat();
   const [highlightedSource, setHighlightedSource] = useState<number | null>(null);
   const [mobileTab, setMobileTab] = useState<"chat" | "sources">("chat");
+
+  // Yandex Metrika pageview. The shared metrika.js loader is in spa-mode
+  // (no auto-hit), so this is the only place a pageview gets sent.
+  useEffect(() => {
+    if (typeof window !== "undefined" && typeof (window as any).ym === "function") {
+      (window as any).ym(109033343, "hit", window.location.pathname + window.location.search);
+    }
+  }, []);
 
   function handleCiteClick(index: number) {
     setHighlightedSource(index);

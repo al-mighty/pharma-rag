@@ -11,7 +11,9 @@
   <div id="root"></div>
   <script type="module" src="/src/main.tsx"></script>
   <script async src="https://cheslav.space/survivors/feedback/widget.js" data-project="pharma"></script>
-  <script async src="https://cheslav.space/metrika.js"></script>
+  <!-- data-mode="spa" — loader skips its auto-hit; App fires ym hit on
+       mount so the SPA's single canonical URL is counted once per visit. -->
+  <script async src="https://cheslav.space/metrika.js" data-mode="spa"></script>
   <script async src="https://cheslav.space/linkpulse/track.js" data-project="pharma"></script>
 </body>
 </html>
